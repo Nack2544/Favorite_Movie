@@ -28,10 +28,22 @@ function Home(){
         }
             loadPopularMovies();
         }, [])
-
-    const handleSearch = (e) => {
+    // what is async? and await?
+    const handleSearch = async (e) => {
         e.preventDefault();
-        alert(searchQuery);
+        if(!searchQuery.trim()) return;
+
+        setLoading(true);
+        try{
+            const searchResults = await searchMovies(searchQuery)
+            setMovies(searchResults);
+            setError(null)
+        } catch(err){
+            console.log(err)
+            setError("Failed to search movies...")
+        } finally{
+            setLoading(false);
+        }
         setSearchQuery("");
     }
     return(
@@ -46,11 +58,16 @@ function Home(){
             />
             <button type="submit" className="search-button">Search</button>
         </form>
-      <div className="movies-gird">
+
+        {error && <div className="error-message">{error}</div>}
+
+      {loading ? <div className="loading">Loading ...</div> : <div className="movies-gird">
         {movies.map((movie =>
             movie.title.toLowerCase().includes(searchQuery) && (<MovieCard movie={movie} key={movie.id}/>)
         ))}
        </div>
+       }
+      
       </div>
     );
 }
